@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { getCharacters } from '@/lib/db/characters'
 import { CharacterCard } from '@/components/characters/character-card'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const characters = await getCharacters()
 

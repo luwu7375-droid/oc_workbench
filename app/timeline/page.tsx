@@ -4,16 +4,19 @@ import { getItems } from '@/lib/db/items'
 import { CharacterSelector } from '@/components/characters/character-selector'
 import { TimelineView } from '@/components/timeline/timeline-view'
 
+export const dynamic = 'force-dynamic'
+
 export default async function TimelinePage({
   searchParams,
 }: {
-  searchParams: { ids?: string | string[] }
+  searchParams: Promise<{ ids?: string | string[] }>
 }) {
+  const { ids } = await searchParams
   const allCharacters = await getCharacters()
-  const selectedIds = Array.isArray(searchParams.ids)
-    ? searchParams.ids
-    : searchParams.ids
-    ? [searchParams.ids]
+  const selectedIds = Array.isArray(ids)
+    ? ids
+    : ids
+    ? [ids]
     : []
 
   const items = selectedIds.length >= 1 ? await getItems(selectedIds) : []

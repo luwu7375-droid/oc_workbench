@@ -4,16 +4,19 @@ import { getItems } from '@/lib/db/items'
 import { ItemCard } from '@/components/items/item-card'
 import { CharacterSelector } from '@/components/characters/character-selector'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CoOccurrencePage({
   searchParams,
 }: {
-  searchParams: { ids?: string | string[] }
+  searchParams: Promise<{ ids?: string | string[] }>
 }) {
+  const { ids } = await searchParams
   const allCharacters = await getCharacters()
-  const selectedIds = Array.isArray(searchParams.ids)
-    ? searchParams.ids
-    : searchParams.ids
-    ? [searchParams.ids]
+  const selectedIds = Array.isArray(ids)
+    ? ids
+    : ids
+    ? [ids]
     : []
 
   const items = selectedIds.length >= 2 ? await getItems(selectedIds) : []

@@ -4,11 +4,14 @@ import { getCharacterById } from '@/lib/db/characters'
 import { getItems } from '@/lib/db/items'
 import { CharacterTabs } from '@/components/characters/character-tabs'
 
-export default async function CharacterPage({ params }: { params: { id: string } }) {
-  const character = await getCharacterById(params.id)
+export const dynamic = 'force-dynamic'
+
+export default async function CharacterPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const character = await getCharacterById(id)
   if (!character) notFound()
 
-  const allItems = await getItems([params.id])
+  const allItems = await getItems([id])
   const profileItems = allItems.filter((i) => ['profile', 'reference', 'image', 'state_card'].includes(i.itemType))
   const snippetItems = allItems.filter((i) => i.itemType === 'snippet')
 
@@ -29,17 +32,17 @@ export default async function CharacterPage({ params }: { params: { id: string }
         </div>
       </div>
       <div className="flex gap-2 mb-6">
-        <Link href={`/characters/${params.id}/items/new?type=profile`}>
+        <Link href={`/characters/${id}/items/new?type=profile`}>
           <button className="px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-700 text-sm hover:bg-zinc-50">+ 新增资料</button>
         </Link>
-        <Link href={`/characters/${params.id}/items/new?type=snippet`}>
+        <Link href={`/characters/${id}/items/new?type=snippet`}>
           <button className="px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-700 text-sm hover:bg-zinc-50">+ 新增片段</button>
         </Link>
-        <Link href={`/co-occurrence?ids=${params.id}`}>
+        <Link href={`/co-occurrence?ids=${id}`}>
           <button className="px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-700 text-sm hover:bg-zinc-50">多角色共现</button>
         </Link>
       </div>
-      <CharacterTabs profileItems={profileItems} snippetItems={snippetItems} characterId={params.id} />
+      <CharacterTabs profileItems={profileItems} snippetItems={snippetItems} characterId={id} />
     </main>
   )
 }
