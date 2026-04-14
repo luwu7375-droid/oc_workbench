@@ -1,13 +1,49 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Character {
+  id        String          @id @default(cuid())
+  name      String
+  note      String?
+  avatar    String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  items     ItemCharacter[]
+}
+
+model Item {
+  id             String          @id @default(cuid())
+  content        String
+  title          String?
+  itemType       ItemType        @default(reference)
+  pinned         Boolean         @default(false)
+  image          String?
+  fictionalOrder Int?
+  fictionalStage String?
+  isPublic       Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  characters     ItemCharacter[]
+}
+
+model ItemCharacter {
+  item        Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId      String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  characterId String
+
+  @@id([itemId, characterId])
+}
+
+enum ItemType {
+  profile
+  snippet
+  reference
+  image
+  state_card
 }
