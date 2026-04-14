@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getCharacterById } from '@/lib/db/characters'
 import { getItems } from '@/lib/db/items'
 import { CharacterTabs } from '@/components/characters/character-tabs'
+import { DeleteCharacterButton } from '@/components/characters/delete-character-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +42,9 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
         <Link href={`/co-occurrence?ids=${id}`}>
           <button className="px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-700 text-sm hover:bg-zinc-50">多角色共现</button>
         </Link>
+        <div className="ml-auto">
+          <DeleteCharacterButton id={id} />
+        </div>
       </div>
       <CharacterTabs profileItems={profileItems} snippetItems={snippetItems} characterId={id} />
     </main>

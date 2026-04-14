@@ -1,10 +1,11 @@
 'use client'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import type { Character } from '@/types'
 
 export function CharacterSelector({ characters, selectedIds }: { characters: Character[]; selectedIds: string[] }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
 
   function toggle(id: string) {
     const next = selectedIds.includes(id)
@@ -13,7 +14,7 @@ export function CharacterSelector({ characters, selectedIds }: { characters: Cha
     const params = new URLSearchParams(searchParams.toString())
     params.delete('ids')
     next.forEach((x) => params.append('ids', x))
-    router.push(`/co-occurrence?${params.toString()}`)
+    router.push(`${pathname}?${params.toString()}`)
   }
 
   return (
