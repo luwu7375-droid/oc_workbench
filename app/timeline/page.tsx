@@ -1,0 +1,43 @@
+import Link from 'next/link'
+import { getCharacters } from '@/lib/db/characters'
+import { getItems } from '@/lib/db/items'
+import { CharacterSelector } from '@/components/characters/character-selector'
+import { TimelineView } from '@/components/timeline/timeline-view'
+
+export default async function TimelinePage({
+  searchParams,
+}: {
+  searchParams: { ids?: string | string[] }
+}) {
+  const allCharacters = await getCharacters()
+  const selectedIds = Array.isArray(searchParams.ids)
+    ? searchParams.ids
+    : searchParams.ids
+    ? [searchParams.ids]
+    : []
+
+  const items = selectedIds.length >= 1 ? await getItems(selectedIds) : []
+  const timelineItems = selectedIds.length >= 2
+    ? items.filter((item) => {
+        const itemCharIds = item.characters.map((c) => c.character.id)
+        return selectedIds.every((id) => itemCharIds.includes(id))
+      })
+    : items
+
+  return (
+    <main className="max-w-2xl mx-auto px-4 py-12">
+      <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-600 mb-6 inline-block">← 角色库</Link>
+      <h1 className="text-xl font-semibold text-zinc-900 mb-4">
+        {selectedIds.length >= 2 ? '共现时间轴' : '单角色时间轴'}
+      </h1>
+      <CharacterSelector characters={allCharacters} selectedIds={selectedIds} />
+      {selectedIds.length === 0 ? (
+        <p className="text-sm text-zinc-400 py-8 text-center">请选择角色</p>
+      ) : timelineItems.length === 0 ? (
+        <p className="text-sm text-zinc-400 py-8 text-center">暂无内容</p>
+      ) : (
+        <TimelineView initialItems={timelineItems} />
+      )}
+    </main>
+  )
+}
