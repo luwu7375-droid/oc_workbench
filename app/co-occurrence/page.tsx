@@ -3,6 +3,7 @@ import { getCharacters } from '@/lib/db/characters'
 import { getItems } from '@/lib/db/items'
 import { ItemCard } from '@/components/items/item-card'
 import { CharacterSelector } from '@/components/characters/character-selector'
+import type { ItemWithCharacters } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,8 +20,9 @@ export default async function CoOccurrencePage({
     ? [ids]
     : []
 
-  const items = selectedIds.length >= 2 ? await getItems(selectedIds) : []
-  const coItems = items.filter((item) => {
+  const items = selectedIds.length >= 2 ? await getItems(selectedIds) as ItemWithCharacters[] : []
+  const snippetItems = items.filter((i) => i.itemType === 'snippet')
+  const coItems = snippetItems.filter((item) => {
     const itemCharIds = item.characters.map((c) => c.character.id)
     return selectedIds.every((id) => itemCharIds.includes(id))
   })

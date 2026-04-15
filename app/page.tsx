@@ -13,6 +13,11 @@ export default async function HomePage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-zinc-900">角色库</h1>
         <div className="flex gap-2">
+          <Link href="/graph">
+            <button className="px-4 py-2 rounded-lg border border-zinc-200 text-zinc-700 text-sm font-medium hover:bg-zinc-50 transition-colors">
+              关系图谱
+            </button>
+          </Link>
           <Link href="/import">
             <button className="px-4 py-2 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-700 transition-colors">
               导入内容

@@ -3,6 +3,7 @@ import { getCharacters } from '@/lib/db/characters'
 import { getItems } from '@/lib/db/items'
 import { CharacterSelector } from '@/components/characters/character-selector'
 import { TimelineView } from '@/components/timeline/timeline-view'
+import type { ItemWithCharacters } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,13 +20,14 @@ export default async function TimelinePage({
     ? [ids]
     : []
 
-  const items = selectedIds.length >= 1 ? await getItems(selectedIds) : []
+  const items = selectedIds.length >= 1 ? await getItems(selectedIds) as ItemWithCharacters[] : []
+  const snippetItems = items.filter((i) => i.itemType === 'snippet')
   const timelineItems = selectedIds.length >= 2
-    ? items.filter((item) => {
+    ? snippetItems.filter((item) => {
         const itemCharIds = item.characters.map((c) => c.character.id)
         return selectedIds.every((id) => itemCharIds.includes(id))
       })
-    : items
+    : snippetItems
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-12">

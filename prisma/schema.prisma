@@ -7,13 +7,15 @@ datasource db {
 }
 
 model Character {
-  id        String          @id @default(cuid())
-  name      String
-  note      String?
-  avatar    String?
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  items     ItemCharacter[]
+  id                String                    @id @default(cuid())
+  name              String
+  note              String?
+  avatar            String?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  items             ItemCharacter[]
+  relationshipsFrom CharacterRelationship[]   @relation("RelationshipFrom")
+  relationshipsTo   CharacterRelationship[]   @relation("RelationshipTo")
 }
 
 model Item {
@@ -46,4 +48,19 @@ enum ItemType {
   reference
   image
   state_card
+}
+
+model CharacterRelationship {
+  id        String    @id @default(cuid())
+  fromId    String
+  toId      String
+  label     String
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  from      Character @relation("RelationshipFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to        Character @relation("RelationshipTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId, label])
 }
