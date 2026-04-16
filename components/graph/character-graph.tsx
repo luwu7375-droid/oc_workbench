@@ -19,12 +19,19 @@ export function CharacterGraph({
   onEdgeClick,
   onNodeClick,
 }: CharacterGraphProps) {
-  const { positions, isDone } = useForceSimulation(data.nodes, data.edges, { width, height })
+  const { positions, positionsRef, isDone } = useForceSimulation(data.nodes, data.edges, { width, height })
   const [draggedNode, setDraggedNode] = useState<string | null>(null)
+  const [dragOverride, setDragOverride] = useState<{ x: number; y: number } | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
+
+  // Merge simulation positions with any active drag override
+  const resolvedPositions = draggedNode && dragOverride
+    ? new Map(positions).set(draggedNode, dragOverride)
+    : positions
 
   const handleMouseDown = (nodeId: string) => {
     setDraggedNode(nodeId)
+    setDragOverride(null)
   }
 
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -34,12 +41,14 @@ export function CharacterGraph({
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
-    const newPositions = new Map(positions)
-    newPositions.set(draggedNode, { x, y })
+    // Keep the positionsRef in sync so the simulation doesn't fight the drag
+    positionsRef.current.set(draggedNode, { x, y })
+    setDragOverride({ x, y })
   }
 
   const handleMouseUp = () => {
     setDraggedNode(null)
+    setDragOverride(null)
   }
 
   return (
@@ -69,8 +78,8 @@ export function CharacterGraph({
       {/* 边 */}
       <g className="edges">
         {data.edges.map((edge) => {
-          const sourcePos = positions.get(edge.source)
-          const targetPos = positions.get(edge.target)
+          const sourcePos = resolvedPositions.get(edge.source)
+          const targetPos = resolvedPositions.get(edge.target)
           if (!sourcePos || !targetPos) return null
 
           const midX = (sourcePos.x + targetPos.x) / 2
@@ -108,7 +117,7 @@ export function CharacterGraph({
       {/* 节点 */}
       <g className="nodes">
         {data.nodes.map((node) => {
-          const pos = positions.get(node.id)
+          const pos = resolvedPositions.get(node.id)
           if (!pos) return null
 
           return (

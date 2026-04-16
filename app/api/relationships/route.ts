@@ -7,6 +7,9 @@ const CreateSchema = z.object({
   toId: z.string().cuid(),
   label: z.string().min(1).max(50),
   note: z.string().max(500).optional(),
+}).refine(data => data.fromId !== data.toId, {
+  message: '角色不能与自身建立关系',
+  path: ['toId'],
 })
 
 export async function GET() {
