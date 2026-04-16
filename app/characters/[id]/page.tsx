@@ -6,6 +6,7 @@ import { CharacterTabs } from '@/components/characters/character-tabs'
 import { DeleteCharacterButton } from '@/components/characters/delete-character-button'
 import { CharacterHeader } from '@/components/characters/character-header'
 import { StateCardSection } from '@/components/items/state-card-section'
+import { ShareButton } from '@/components/characters/share-button'
 import type { ItemWithCharacters } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -19,6 +20,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
   const stateCard = allItems.find((i) => i.itemType === 'state_card')
   const profileItems = allItems.filter((i) => ['profile', 'reference', 'image'].includes(i.itemType))
   const snippetItems = allItems.filter((i) => i.itemType === 'snippet')
+  const hasPublicProfiles = allItems.some((i) => i.itemType === 'profile' && i.isPublic)
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-12">
@@ -37,6 +39,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
         <Link href={`/co-occurrence?ids=${id}`}>
           <button className="px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-700 text-sm hover:bg-zinc-50">多角色共现</button>
         </Link>
+        <ShareButton characterId={id} hasPublicProfiles={hasPublicProfiles} />
         <div className="ml-auto">
           <DeleteCharacterButton id={id} />
         </div>
