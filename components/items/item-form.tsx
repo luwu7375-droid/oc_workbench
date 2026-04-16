@@ -3,6 +3,7 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { ItemType } from '@prisma/client'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const TYPE_LABELS: Record<ItemType, string> = {
   profile: '设定资料',
@@ -12,6 +13,12 @@ const TYPE_LABELS: Record<ItemType, string> = {
   state_card: '当前状态',
 }
 
+interface RecalledReference {
+  id: string
+  title: string
+  content: string
+}
+
 export function ItemForm({ characterId, defaultType }: { characterId: string; defaultType?: ItemType }) {
   const router = useRouter()
   const [title, setTitle] = useState('')
@@ -19,7 +26,11 @@ export function ItemForm({ characterId, defaultType }: { characterId: string; de
   const [itemType, setItemType] = useState<ItemType>(defaultType ?? 'profile')
   const [branch, setBranch] = useState('')
   const [loading, setLoading] = useState(false)
+  const [recalling, setRecalling] = useState(false)
+  const [showRecallDialog, setShowRecallDialog] = useState(false)
+  const [recalledReferences, setRecalledReferences] = useState<RecalledReference[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const isProfileMode = !defaultType || ['profile', 'reference', 'image', 'state_card'].includes(defaultType)
   const availableTypes = isProfileMode
@@ -81,6 +92,47 @@ export function ItemForm({ characterId, defaultType }: { characterId: string; de
     router.refresh()
   }
 
+  async function handleRecallReferences() {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    // 获取选中文本或全部文本
+    const selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd)
+    const textToAnalyze = selectedText.trim() || content.trim()
+
+    if (!textToAnalyze) {
+      toast.error('请先输入或选中文本')
+      return
+    }
+
+    setRecalling(true)
+    try {
+      const res = await fetch('/api/ai/recall-references', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: textToAnalyze,
+          characterIds: [characterId],
+        }),
+      })
+      const json = await res.json()
+      if (json.error) {
+        toast.error(json.error)
+        return
+      }
+      setRecalledReferences(json.data)
+      if (json.data.length === 0) {
+        toast.info('未找到相关摘抄')
+      } else {
+        setShowRecallDialog(true)
+      }
+    } catch {
+      toast.error('召回失败')
+    } finally {
+      setRecalling(false)
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div>
@@ -139,14 +191,46 @@ export function ItemForm({ characterId, defaultType }: { characterId: string; de
       ) : (
         <div>
           <label className="block text-sm font-medium text-zinc-700 mb-1">内容 <span className="text-red-400">*</span></label>
-          <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="输入内容…" rows={8}
-            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 resize-none" />
+          {itemType === 'snippet' && (
+            <button
+              type="button"
+              onClick={handleRecallReferences}
+              disabled={recalling || loading}
+              className="mb-2 px-3 py-1.5 rounded-lg border border-zinc-200 text-sm text-zinc-600 hover:bg-zinc-50 disabled:opacity-50 transition-colors"
+            >
+              {recalling ? '召回中...' : '召回相关摘抄'}
+            </button>
+          )}
+          <textarea
+            ref={textareaRef}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="输入内容…"
+            rows={8}
+            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 resize-none"
+          />
         </div>
       )}
       <button type="submit" disabled={loading}
         className="w-full rounded-lg bg-zinc-900 text-white py-2 text-sm font-medium hover:bg-zinc-700 disabled:opacity-50 transition-colors">
         {loading ? '保存中…' : '保存'}
       </button>
+
+      <Dialog open={showRecallDialog} onOpenChange={setShowRecallDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>相关摘抄</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 mt-4">
+            {recalledReferences.map((ref) => (
+              <div key={ref.id} className="p-4 rounded-lg border border-zinc-200 hover:border-zinc-300 transition-colors">
+                <h3 className="font-medium text-zinc-900 mb-2">{ref.title}</h3>
+                <p className="text-sm text-zinc-600 whitespace-pre-wrap">{ref.content}</p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   )
 }

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ItemCard } from '@/components/items/item-card'
 import { TimelineView } from '@/components/timeline/timeline-view'
+import { GenerateSummaryButton } from '@/components/characters/generate-summary-button'
 import type { ItemWithCharacters } from '@/types'
 
 export function CharacterTabs({
@@ -18,6 +19,7 @@ export function CharacterTabs({
   const [view, setView] = useState<'list' | 'timeline'>('list')
   const router = useRouter()
   const items = tab === 'profile' ? profileItems : snippetItems
+  const hasPublicProfiles = profileItems.some((item) => item.isPublic && item.itemType === 'profile')
 
   return (
     <div>
@@ -40,6 +42,9 @@ export function CharacterTabs({
             时间轴
           </button>
         </div>
+      )}
+      {tab === 'profile' && (
+        <GenerateSummaryButton characterId={characterId} hasPublicProfiles={hasPublicProfiles} />
       )}
       {items.length === 0 ? (
         <p className="text-sm text-zinc-400 py-8 text-center">暂无内容</p>
