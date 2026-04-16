@@ -5,6 +5,7 @@ import { getItems } from '@/lib/db/items'
 import { CharacterTabs } from '@/components/characters/character-tabs'
 import { DeleteCharacterButton } from '@/components/characters/delete-character-button'
 import { CharacterHeader } from '@/components/characters/character-header'
+import { StateCardSection } from '@/components/items/state-card-section'
 import type { ItemWithCharacters } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -15,7 +16,8 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
   if (!character) notFound()
 
   const allItems = await getItems([id]) as ItemWithCharacters[]
-  const profileItems = allItems.filter((i) => ['profile', 'reference', 'image', 'state_card'].includes(i.itemType))
+  const stateCard = allItems.find((i) => i.itemType === 'state_card')
+  const profileItems = allItems.filter((i) => ['profile', 'reference', 'image'].includes(i.itemType))
   const snippetItems = allItems.filter((i) => i.itemType === 'snippet')
 
   return (
@@ -39,6 +41,10 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
           <DeleteCharacterButton id={id} />
         </div>
       </div>
+
+      {/* 当前状态卡区域 */}
+      <StateCardSection characterId={id} stateCard={stateCard} />
+
       <CharacterTabs profileItems={profileItems} snippetItems={snippetItems} characterId={id} />
     </main>
   )

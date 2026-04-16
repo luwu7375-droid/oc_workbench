@@ -17,6 +17,7 @@ export function ItemForm({ characterId, defaultType }: { characterId: string; de
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [itemType, setItemType] = useState<ItemType>(defaultType ?? 'profile')
+  const [branch, setBranch] = useState('')
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -68,6 +69,7 @@ export function ItemForm({ characterId, defaultType }: { characterId: string; de
         title: title.trim() || undefined,
         content: content.trim(),
         itemType,
+        branch: branch.trim() || undefined,
         characterIds: [characterId],
         image: itemType === 'image' ? content : undefined,
       }),
@@ -95,6 +97,11 @@ export function ItemForm({ characterId, defaultType }: { characterId: string; de
       <div>
         <label className="block text-sm font-medium text-zinc-700 mb-1">标题 <span className="text-zinc-400 font-normal">（选填）</span></label>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="给这条内容起个标题"
+          className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-zinc-700 mb-1">分支线 <span className="text-zinc-400 font-normal">（选填，如"IF线-A与B相遇"）</span></label>
+        <input value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="留空表示主线"
           className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400" />
       </div>
       {itemType === 'image' ? (

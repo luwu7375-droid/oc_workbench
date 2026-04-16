@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ItemCard } from '@/components/items/item-card'
+import { TimelineView } from '@/components/timeline/timeline-view'
 import type { ItemWithCharacters } from '@/types'
 
 export function CharacterTabs({
@@ -14,6 +15,7 @@ export function CharacterTabs({
   characterId: string
 }) {
   const [tab, setTab] = useState<'profile' | 'snippet'>('profile')
+  const [view, setView] = useState<'list' | 'timeline'>('list')
   const router = useRouter()
   const items = tab === 'profile' ? profileItems : snippetItems
 
@@ -27,8 +29,22 @@ export function CharacterTabs({
           </button>
         ))}
       </div>
+      {tab === 'snippet' && snippetItems.length > 0 && (
+        <div className="flex gap-2 mb-4">
+          <button onClick={() => setView('list')}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${view === 'list' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}>
+            列表视图
+          </button>
+          <button onClick={() => setView('timeline')}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${view === 'timeline' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}>
+            时间轴
+          </button>
+        </div>
+      )}
       {items.length === 0 ? (
         <p className="text-sm text-zinc-400 py-8 text-center">暂无内容</p>
+      ) : tab === 'snippet' && view === 'timeline' ? (
+        <TimelineView initialItems={snippetItems} />
       ) : (
         <div className="flex flex-col gap-2">
           {items.map((item) => (

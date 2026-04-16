@@ -1,12 +1,15 @@
 import Link from 'next/link'
 import { getCharacters } from '@/lib/db/characters'
+import { getCharacterGroups } from '@/lib/db/character-groups'
 import { CharacterCard } from '@/components/characters/character-card'
 import { SearchBar } from '@/components/search/search-bar'
+import { GroupList } from '@/components/character-groups/group-list'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const characters = await getCharacters()
+  const characterGroups = await getCharacterGroups()
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-12">
@@ -32,6 +35,8 @@ export default async function HomePage() {
       </div>
 
       <SearchBar />
+
+      <GroupList groups={characterGroups} characters={characters} />
 
       {characters.length === 0 ? (
         <div className="text-center py-20 text-zinc-400">

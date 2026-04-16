@@ -49,6 +49,9 @@ export function ItemCard({ item, onUpdate }: { item: ItemWithCharacters; onUpdat
         {item.fictionalStage && (
           <span className="text-xs text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded-full">{item.fictionalStage}</span>
         )}
+        {item.branch && (
+          <span className="text-xs text-zinc-500 bg-zinc-50 px-2 py-0.5 rounded-full border border-zinc-200">{item.branch}</span>
+        )}
       </div>
     </div>
   )

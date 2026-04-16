@@ -10,6 +10,7 @@ const updateSchema = z.object({
   pinned: z.boolean().optional(),
   fictionalOrder: z.number().int().optional(),
   fictionalStage: z.string().optional(),
+  branch: z.string().optional(),
   characterIds: z.array(z.string()).optional(),
 })
 

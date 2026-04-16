@@ -7,6 +7,7 @@ const createSchema = z.object({
   content: z.string().min(1),
   title: z.string().optional(),
   itemType: z.nativeEnum(ItemType).optional(),
+  branch: z.string().optional(),
   characterIds: z.array(z.string()).min(1),
 })
 

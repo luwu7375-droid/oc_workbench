@@ -27,6 +27,7 @@ model Item {
   image          String?
   fictionalOrder Int?
   fictionalStage String?
+  branch         String?
   isPublic       Boolean         @default(false)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -63,4 +64,12 @@ model CharacterRelationship {
   to        Character @relation("RelationshipTo", fields: [toId], references: [id], onDelete: Cascade)
 
   @@unique([fromId, toId, label])
+}
+
+model CharacterGroup {
+  id           String   @id @default(cuid())
+  name         String
+  characterIds String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

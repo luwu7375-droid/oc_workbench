@@ -22,6 +22,7 @@ export async function createItem(data: {
   content: string
   title?: string
   itemType?: ItemType
+  branch?: string
   characterIds: string[]
 }) {
   const { characterIds, ...rest } = data
@@ -41,6 +42,7 @@ export async function updateItem(id: string, data: {
   pinned?: boolean
   fictionalOrder?: number
   fictionalStage?: string
+  branch?: string
   characterIds?: string[]
 }) {
   const { characterIds, ...rest } = data
