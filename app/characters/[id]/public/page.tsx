@@ -1,16 +1,19 @@
 import { notFound } from 'next/navigation'
-import { getCharacterById } from '@/lib/db/characters'
-import { getItems } from '@/lib/db/items'
+import { prisma } from '@/lib/prisma'
 import type { ItemWithCharacters } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CharacterPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const character = await getCharacterById(id)
+  const character = await prisma.character.findUnique({ where: { id } })
   if (!character) notFound()
 
-  const allItems = await getItems([id]) as ItemWithCharacters[]
+  const allItems = await prisma.item.findMany({
+    where: { characters: { some: { characterId: id } } },
+    include: { characters: { include: { character: true } } },
+    orderBy: [{ pinned: 'desc' }, { updatedAt: 'desc' }],
+  }) as ItemWithCharacters[]
   const publicProfiles = allItems.filter((i) => i.itemType === 'profile' && i.isPublic)
 
   return (

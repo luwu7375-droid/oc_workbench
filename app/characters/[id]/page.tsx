@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { auth } from '@clerk/nextjs/server'
 import { getCharacterById } from '@/lib/db/characters'
 import { getItems } from '@/lib/db/items'
 import { CharacterTabs } from '@/components/characters/character-tabs'
@@ -12,11 +13,12 @@ import type { ItemWithCharacters } from '@/types'
 export const dynamic = 'force-dynamic'
 
 export default async function CharacterPage({ params }: { params: Promise<{ id: string }> }) {
+  const { userId } = await auth()
   const { id } = await params
-  const character = await getCharacterById(id)
+  const character = await getCharacterById(id, userId!)
   if (!character) notFound()
 
-  const allItems = await getItems([id]) as ItemWithCharacters[]
+  const allItems = await getItems(userId!, [id]) as ItemWithCharacters[]
   const stateCard = allItems.find((i) => i.itemType === 'state_card')
   const profileItems = allItems.filter((i) => ['profile', 'reference', 'image'].includes(i.itemType))
   const snippetItems = allItems.filter((i) => i.itemType === 'snippet')
