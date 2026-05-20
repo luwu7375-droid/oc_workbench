@@ -8,6 +8,7 @@ datasource db {
 
 model Character {
   id                String                    @id @default(cuid())
+  userId            String
   name              String
   note              String?
   avatar            String?
@@ -16,6 +17,8 @@ model Character {
   items             ItemCharacter[]
   relationshipsFrom CharacterRelationship[]   @relation("RelationshipFrom")
   relationshipsTo   CharacterRelationship[]   @relation("RelationshipTo")
+
+  @@index([userId])
 }
 
 model Item {
@@ -68,8 +71,11 @@ model CharacterRelationship {
 
 model CharacterGroup {
   id           String   @id @default(cuid())
+  userId       String
   name         String
   characterIds String[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([userId])
 }
