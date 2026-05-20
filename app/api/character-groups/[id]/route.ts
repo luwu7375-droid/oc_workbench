@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { z } from 'zod'
 import { getCharacterGroupById, updateCharacterGroup, deleteCharacterGroup } from '@/lib/db/character-groups'
 
@@ -11,12 +12,13 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { id } = await params
-    const data = await getCharacterGroupById(id)
-    if (!data) {
-      return NextResponse.json({ data: null, error: '角色组不存在' }, { status: 404 })
-    }
+    const data = await getCharacterGroupById(id, userId)
+    if (!data) return NextResponse.json({ data: null, error: '角色组不存在' }, { status: 404 })
     return NextResponse.json({ data, error: null })
   } catch {
     return NextResponse.json({ data: null, error: '获取角色组失败' }, { status: 500 })
@@ -27,14 +29,16 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { id } = await params
     const body = await req.json()
     const parsed = updateSchema.safeParse(body)
-    if (!parsed.success) {
-      return NextResponse.json({ data: null, error: '参数错误' }, { status: 400 })
-    }
-    const data = await updateCharacterGroup(id, parsed.data)
+    if (!parsed.success) return NextResponse.json({ data: null, error: '参数错误' }, { status: 400 })
+    const data = await updateCharacterGroup(id, userId, parsed.data)
+    if (!data) return NextResponse.json({ data: null, error: '角色组不存在' }, { status: 404 })
     return NextResponse.json({ data, error: null })
   } catch {
     return NextResponse.json({ data: null, error: '更新角色组失败' }, { status: 500 })
@@ -45,10 +49,14 @@ export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { id } = await params
-    await deleteCharacterGroup(id)
-    return NextResponse.json({ data: { success: true }, error: null })
+    const result = await deleteCharacterGroup(id, userId)
+    if (!result) return NextResponse.json({ data: null, error: '角色组不存在' }, { status: 404 })
+    return NextResponse.json({ data: null, error: null })
   } catch {
     return NextResponse.json({ data: null, error: '删除角色组失败' }, { status: 500 })
   }

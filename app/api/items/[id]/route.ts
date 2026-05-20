@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { z } from 'zod'
 import { getItemById, updateItem, deleteItem } from '@/lib/db/items'
 import { ItemType } from '@prisma/client'
@@ -15,10 +16,15 @@ const updateSchema = z.object({
 })
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { id } = await params
     const data = await getItemById(id)
     if (!data) return NextResponse.json({ data: null, error: '内容不存在' }, { status: 404 })
+    const owned = data.characters.some((ic) => ic.character.userId === userId)
+    if (!owned) return NextResponse.json({ data: null, error: '内容不存在' }, { status: 404 })
     return NextResponse.json({ data, error: null })
   } catch {
     return NextResponse.json({ data: null, error: '获取内容失败' }, { status: 500 })
@@ -26,12 +32,16 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { id } = await params
     const body = await req.json()
     const parsed = updateSchema.safeParse(body)
     if (!parsed.success) return NextResponse.json({ data: null, error: '参数错误' }, { status: 400 })
-    const data = await updateItem(id, parsed.data)
+    const data = await updateItem(id, userId, parsed.data)
+    if (!data) return NextResponse.json({ data: null, error: '内容不存在' }, { status: 404 })
     return NextResponse.json({ data, error: null })
   } catch {
     return NextResponse.json({ data: null, error: '更新内容失败' }, { status: 500 })
@@ -39,9 +49,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 }
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { id } = await params
-    await deleteItem(id)
+    const result = await deleteItem(id, userId)
+    if (!result) return NextResponse.json({ data: null, error: '内容不存在' }, { status: 404 })
     return NextResponse.json({ data: null, error: null })
   } catch {
     return NextResponse.json({ data: null, error: '删除内容失败' }, { status: 500 })

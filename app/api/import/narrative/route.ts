@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { createRelationship } from '@/lib/db/relationships'
 
 export async function POST(req: NextRequest) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { text } = await req.json()
 
@@ -87,17 +91,16 @@ ${text}`,
     const parsed = JSON.parse(jsonMatch[0])
     const { characters, snippets, relationships = [] } = parsed
 
-    // 创建或查找角色
+    // 创建或查找角色（限定当前用户）
     const characterMap = new Map<string, string>() // name -> id
 
     for (const char of characters) {
       const existing = await prisma.character.findFirst({
-        where: { name: { equals: char.name, mode: 'insensitive' } },
+        where: { userId, name: { equals: char.name, mode: 'insensitive' } },
       })
 
       if (existing) {
         characterMap.set(char.name, existing.id)
-        // 如果有 profile 且角色没有 note，更新
         if (char.profile && !existing.note) {
           await prisma.character.update({
             where: { id: existing.id },
@@ -107,6 +110,7 @@ ${text}`,
       } else {
         const created = await prisma.character.create({
           data: {
+            userId,
             name: char.name,
             note: char.profile || null,
           },
@@ -143,7 +147,7 @@ ${text}`,
       const toId = characterMap.get(rel.to)
       if (fromId && toId && fromId !== toId) {
         try {
-          await createRelationship({ fromId, toId, label: rel.label })
+          await createRelationship(userId, { fromId, toId, label: rel.label })
           relationshipsCreated++
         } catch {
           // 忽略重复冲突，幂等操作

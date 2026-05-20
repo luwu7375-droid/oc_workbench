@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(req: Request) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { query } = await req.json()
     if (!query || typeof query !== 'string') {
@@ -9,11 +13,17 @@ export async function POST(req: Request) {
     }
     const [characters, items] = await Promise.all([
       prisma.character.findMany({
-        where: { OR: [{ name: { contains: query } }, { note: { contains: query } }] },
+        where: {
+          userId,
+          OR: [{ name: { contains: query } }, { note: { contains: query } }],
+        },
         take: 10,
       }),
       prisma.item.findMany({
-        where: { OR: [{ title: { contains: query } }, { content: { contains: query } }] },
+        where: {
+          characters: { some: { character: { userId } } },
+          OR: [{ title: { contains: query } }, { content: { contains: query } }],
+        },
         include: { characters: { include: { character: true } } },
         take: 20,
       }),
