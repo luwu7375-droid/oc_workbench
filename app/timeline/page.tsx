@@ -14,7 +14,7 @@ export default async function TimelinePage({
 }: {
   searchParams: Promise<{ ids?: string | string[]; branch?: string }>
 }) {
-  const userId = getUserId()
+  const userId = await getUserId()
   const { ids, branch } = await searchParams
   const allCharacters = await getCharacters(userId)
   const selectedIds = Array.isArray(ids)

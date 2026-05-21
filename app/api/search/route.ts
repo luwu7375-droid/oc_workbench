@@ -3,7 +3,7 @@ import { getUserId } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(req: Request) {
-  const userId = getUserId()
+  const userId = await getUserId()
 
   try {
     const { query } = await req.json()

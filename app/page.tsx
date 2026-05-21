@@ -9,7 +9,7 @@ import { GroupList } from '@/components/character-groups/group-list'
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const userId = getUserId()
+  const userId = await getUserId()
   const characters = await getCharacters(userId)
   const characterGroups = await getCharacterGroups(userId)
 

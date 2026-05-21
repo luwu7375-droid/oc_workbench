@@ -10,7 +10,7 @@ const createSchema = z.object({
 })
 
 export async function GET() {
-  const userId = getUserId()
+  const userId = await getUserId()
 
   try {
     const data = await getCharacters(userId)
@@ -21,7 +21,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const userId = getUserId()
+  const userId = await getUserId()
 
   try {
     const body = await req.json()

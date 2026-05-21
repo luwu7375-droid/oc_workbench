@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     // 合并所有公开资料内容
     const profileContent = publicProfiles
-      .map((p) => p.content)
+      .map((p: { content: string | null }) => p.content ?? '')
       .join('\n\n')
 
     // 调用 OpenRouter API

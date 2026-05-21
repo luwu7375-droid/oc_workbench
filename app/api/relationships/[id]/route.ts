@@ -9,7 +9,7 @@ const UpdateSchema = z.object({
 })
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const userId = getUserId()
+  const userId = await getUserId()
 
   try {
     const { id } = await params
@@ -27,7 +27,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 }
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const userId = getUserId()
+  const userId = await getUserId()
 
   try {
     const { id } = await params

@@ -4,7 +4,7 @@ import { getCharacters } from '@/lib/db/characters'
 import GraphPageClient from './page-client'
 
 export default async function GraphPage() {
-  const userId = getUserId()
+  const userId = await getUserId()
   const relationships = await getRelationships(userId)
   const graphData = toGraphData(relationships)
   const characters = await getCharacters(userId)

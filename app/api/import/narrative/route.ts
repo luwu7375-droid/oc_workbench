@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { createRelationship } from '@/lib/db/relationships'
 
 export async function POST(req: NextRequest) {
-  const userId = getUserId()
+  const userId = await getUserId()
 
   try {
     const { text } = await req.json()

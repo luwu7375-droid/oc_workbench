@@ -13,7 +13,7 @@ import type { ItemWithCharacters } from '@/types'
 export const dynamic = 'force-dynamic'
 
 export default async function CharacterPage({ params }: { params: Promise<{ id: string }> }) {
-  const userId = getUserId()
+  const userId = await getUserId()
   const { id } = await params
   const character = await getCharacterById(id, userId)
   if (!character) notFound()

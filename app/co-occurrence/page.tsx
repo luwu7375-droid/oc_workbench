@@ -17,7 +17,7 @@ export default async function CoOccurrencePage({
 }: {
   searchParams: Promise<{ ids?: string | string[]; branch?: string }>
 }) {
-  const userId = getUserId()
+  const userId = await getUserId()
   const { ids, branch } = await searchParams
   const allCharacters = await getCharacters(userId)
   const characterGroups = await getCharacterGroups(userId)

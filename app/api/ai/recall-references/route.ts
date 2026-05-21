@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 构建 references 列表供 AI 分析
-    const referencesText = references.map((ref, idx) => {
+    const referencesText = references.map((ref: { title: string | null; content: string }, idx: number) => {
       const title = ref.title || '无标题'
       const content = ref.content.substring(0, 500) // 限制长度避免 token 过多
       return `[${idx}] 标题: ${title}\n内容: ${content}`

@@ -13,7 +13,7 @@ const createSchema = z.object({
 })
 
 export async function GET(req: Request) {
-  const userId = getUserId()
+  const userId = await getUserId()
 
   try {
     const { searchParams } = new URL(req.url)
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const userId = getUserId()
+  const userId = await getUserId()
 
   try {
     const body = await req.json()
