@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { getUserId } from '@/lib/auth'
 import { getCharacters } from '@/lib/db/characters'
 import { getCharacterGroups } from '@/lib/db/character-groups'
 import { CharacterCard } from '@/components/characters/character-card'
@@ -9,9 +9,9 @@ import { GroupList } from '@/components/character-groups/group-list'
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const { userId } = await auth()
-  const characters = await getCharacters(userId!)
-  const characterGroups = await getCharacterGroups(userId!)
+  const userId = getUserId()
+  const characters = await getCharacters(userId)
+  const characterGroups = await getCharacterGroups(userId)
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-12">

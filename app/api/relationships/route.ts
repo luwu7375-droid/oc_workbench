@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getUserId } from '@/lib/auth'
 import { getRelationships, createRelationship } from '@/lib/db/relationships'
 import { z } from 'zod'
 
@@ -14,8 +14,7 @@ const CreateSchema = z.object({
 })
 
 export async function GET() {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  const userId = getUserId()
 
   try {
     const data = await getRelationships(userId)
@@ -26,8 +25,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  const userId = getUserId()
 
   try {
     const body = await req.json()

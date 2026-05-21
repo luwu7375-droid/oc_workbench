@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getUserId } from '@/lib/auth'
 import { updateRelationship, deleteRelationship } from '@/lib/db/relationships'
 import { z } from 'zod'
 
@@ -9,8 +9,7 @@ const UpdateSchema = z.object({
 })
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  const userId = getUserId()
 
   try {
     const { id } = await params
@@ -28,8 +27,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 }
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  const userId = getUserId()
 
   try {
     const { id } = await params

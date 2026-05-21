@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { getUserId } from '@/lib/auth'
 import { getCharacters } from '@/lib/db/characters'
 import { getItems } from '@/lib/db/items'
 import { CharacterSelector } from '@/components/characters/character-selector'
@@ -14,16 +14,16 @@ export default async function TimelinePage({
 }: {
   searchParams: Promise<{ ids?: string | string[]; branch?: string }>
 }) {
-  const { userId } = await auth()
+  const userId = getUserId()
   const { ids, branch } = await searchParams
-  const allCharacters = await getCharacters(userId!)
+  const allCharacters = await getCharacters(userId)
   const selectedIds = Array.isArray(ids)
     ? ids
     : ids
     ? [ids]
     : []
 
-  const items = selectedIds.length >= 1 ? await getItems(userId!, selectedIds) as ItemWithCharacters[] : []
+  const items = selectedIds.length >= 1 ? await getItems(userId, selectedIds) as ItemWithCharacters[] : []
   const snippetItems = items.filter((i) => i.itemType === 'snippet')
   const timelineItems = selectedIds.length >= 2
     ? snippetItems.filter((item) => {

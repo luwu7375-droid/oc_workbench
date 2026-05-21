@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getUserId } from '@/lib/auth'
 import { z } from 'zod'
 import { getItemById, updateItem, deleteItem } from '@/lib/db/items'
 import { ItemType } from '@prisma/client'
@@ -16,8 +16,7 @@ const updateSchema = z.object({
 })
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  const userId = getUserId()
 
   try {
     const { id } = await params
@@ -32,8 +31,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  const userId = getUserId()
 
   try {
     const { id } = await params
@@ -49,8 +47,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 }
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  const userId = getUserId()
 
   try {
     const { id } = await params

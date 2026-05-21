@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getUserId } from '@/lib/auth'
 import { z } from 'zod'
 import { getItems, createItem } from '@/lib/db/items'
 import { ItemType } from '@prisma/client'
@@ -13,8 +13,7 @@ const createSchema = z.object({
 })
 
 export async function GET(req: Request) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  const userId = getUserId()
 
   try {
     const { searchParams } = new URL(req.url)
@@ -27,8 +26,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  const userId = getUserId()
 
   try {
     const body = await req.json()
