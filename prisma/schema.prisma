@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Character {
+  id                String                    @id @default(cuid())
+  userId            String
+  name              String
+  note              String?
+  avatar            String?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  items             ItemCharacter[]
+  relationshipsFrom CharacterRelationship[]   @relation("RelationshipFrom")
+  relationshipsTo   CharacterRelationship[]   @relation("RelationshipTo")
+
+  @@index([userId])
+}
+
+model Item {
+  id             String          @id @default(cuid())
+  content        String
+  title          String?
+  itemType       ItemType        @default(reference)
+  pinned         Boolean         @default(false)
+  image          String?
+  fictionalOrder Int?
+  fictionalStage String?
+  branch         String?
+  isPublic       Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  characters     ItemCharacter[]
+}
+
+model ItemCharacter {
+  item        Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId      String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  characterId String
+
+  @@id([itemId, characterId])
+}
+
+enum ItemType {
+  profile
+  snippet
+  reference
+  image
+  state_card
+}
+
+model CharacterRelationship {
+  id        String    @id @default(cuid())
+  fromId    String
+  toId      String
+  label     String
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  from      Character @relation("RelationshipFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to        Character @relation("RelationshipTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId, label])
+}
+
+model CharacterGroup {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  characterIds String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+}

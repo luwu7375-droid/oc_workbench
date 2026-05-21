@@ -22,13 +22,15 @@
 ## 核心数据模型
 
 ```
-Character       角色，所有内容的锚点
-Item            挂载到角色下的内容（profile/snippet/reference/image/state_card）
-CharacterGroup  角色组合，用于快速进入共现页（P1）
-NarrativeLine   剧情线（P2）
+Character              角色，所有内容的锚点
+Item                   挂载到角色下的内容（profile/snippet/reference/image/state_card）
+CharacterRelationship  角色关系（from/to/label/note），支持关系图谱
+CharacterGroup         角色组合，用于快速进入共现页（P1）
+NarrativeLine          剧情线（P2）
 ```
 
 Item 关键字段：`item_type`, `linked_characters[]`, `fictional_order`, `fictional_stage`, `pinned`
+CharacterRelationship 关键字段：`fromId`, `toId`, `label`, `note`
 
 ## 目录结构
 
@@ -41,12 +43,18 @@ app/
   co-occurrence/page.tsx  多角色共现页
   timeline/page.tsx       共现时间轴
   import/page.tsx         导入页（两种模式）
+  graph/
+    page.tsx              角色关系图谱页
+    page-client.tsx       图谱客户端交互
   api/
     characters/           角色 CRUD
     characters/[id]/      单个角色 CRUD
     items/                内容项 CRUD
     items/[id]/           单个内容项 CRUD
-    import/narrative/     AI 剧情解析导入
+    relationships/        关系 CRUD
+    relationships/[id]/   单个关系 CRUD
+    relationships/graph/  图谱数据接口
+    import/narrative/     AI 剧情解析导入（含关系提取）
     search/               全局搜索
     upload/               图片上传（返回 base64 data URL）
 components/
@@ -67,12 +75,18 @@ components/
     search-bar.tsx        搜索栏
   timeline/
     timeline-view.tsx     共现时间轴视图（dnd-kit 拖拽排序）
+  graph/
+    character-graph.tsx   角色关系图谱（纯 SVG 力导向图）
+    relationship-editor.tsx 关系编辑弹窗
 lib/
   prisma.ts               Prisma client 单例（含 Accelerate 扩展）
   utils.ts                通用工具函数
   db/
     characters.ts         角色数据库查询
     items.ts              内容项数据库查询
+    relationships.ts      关系数据库查询 + 图谱数据转换
+hooks/
+  use-force-simulation.ts 力导向图模拟 Hook
 prisma/
   schema.prisma           数据库 schema
 types/
@@ -105,6 +119,7 @@ types/
 7. ✅ 共现时间轴（拖拽排序 + 阶段标签）
 8. ✅ 基础搜索
 9. ✅ 手动置顶
+10. 🚧 角色关系图谱（力导向图 + 关系编辑 + AI 导入自动提取）
 
 ## 常用命令
 
@@ -131,9 +146,15 @@ POST   /api/items                   创建内容项
 PATCH  /api/items/[id]              更新内容项
 DELETE /api/items/[id]              删除内容项
 
+GET    /api/relationships           获取所有关系
+POST   /api/relationships           创建关系
+PATCH  /api/relationships/[id]      更新关系
+DELETE /api/relationships/[id]      删除关系
+GET    /api/relationships/graph     获取图谱数据（nodes + edges）
+
 POST   /api/search                  全局搜索
 POST   /api/upload                  图片上传（返回 base64 data URL，存于数据库）
-POST   /api/import/narrative        AI 剧情解析导入（调用 OpenRouter API）
+POST   /api/import/narrative        AI 剧情解析导入（调用 OpenRouter API，含关系提取）
 ```
 
 API 统一返回格式：
