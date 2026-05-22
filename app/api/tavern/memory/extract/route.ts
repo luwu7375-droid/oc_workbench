@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getBridgeUserId } from '@/lib/tavern-bridge'
+import { getBridgeUserId, verifyBridgeToken } from '@/lib/tavern-bridge'
 
 const schema = z.object({
   characterIds: z.array(z.string()).min(1),
@@ -14,6 +14,9 @@ const schema = z.object({
 })
 
 export async function POST(req: NextRequest) {
+  if (!verifyBridgeToken(req)) {
+    return NextResponse.json({ data: null, error: '未授权' }, { status: 401 })
+  }
   const userId = getBridgeUserId()
 
   if (!process.env.ANTHROPIC_API_KEY) {

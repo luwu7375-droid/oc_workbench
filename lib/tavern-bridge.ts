@@ -7,3 +7,15 @@ export function getBridgeUserId(): string {
   if (!userId) throw new Error('BRIDGE_USER_ID 环境变量未配置')
   return userId
 }
+
+/**
+ * 验证 Bridge Token。
+ * BRIDGE_TOKEN 未配置时跳过验证（本地开发兼容）。
+ * 返回 true 表示通过，false 表示拒绝。
+ */
+export function verifyBridgeToken(req: Request): boolean {
+  const expected = process.env.BRIDGE_TOKEN
+  if (!expected) return true // 未配置则不启用认证
+  const auth = req.headers.get('Authorization') ?? ''
+  return auth === `Bearer ${expected}`
+}

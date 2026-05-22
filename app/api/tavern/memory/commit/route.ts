@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { getBridgeUserId } from '@/lib/tavern-bridge'
+import { getBridgeUserId, verifyBridgeToken } from '@/lib/tavern-bridge'
 
 const candidateSchema = z.object({
   id: z.string(),
@@ -27,6 +27,9 @@ const TYPE_TO_ITEM_TYPE = {
 } as const
 
 export async function POST(req: NextRequest) {
+  if (!verifyBridgeToken(req)) {
+    return NextResponse.json({ data: null, error: '未授权' }, { status: 401 })
+  }
   const userId = getBridgeUserId()
 
   try {

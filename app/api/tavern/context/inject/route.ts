@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getBridgeUserId } from '@/lib/tavern-bridge'
+import { getBridgeUserId, verifyBridgeToken } from '@/lib/tavern-bridge'
 
 export async function GET(req: NextRequest) {
+  if (!verifyBridgeToken(req)) {
+    return NextResponse.json({ data: null, error: '未授权' }, { status: 401 })
+  }
   const userId = getBridgeUserId()
   const { searchParams } = new URL(req.url)
   const characterIds = searchParams.getAll('characterIds')
