@@ -17,6 +17,8 @@ const ENCRYPTION_KEY = Buffer.from(
 const VARS_TO_PACK = [
   'DATABASE_URL',
   'ANTHROPIC_API_KEY',
+  'BRIDGE_USER_ID',
+  'BRIDGE_TOKEN',
 ]
 
 // 读取 .env.local 或 .env
