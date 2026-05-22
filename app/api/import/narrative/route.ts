@@ -95,7 +95,7 @@ ${text}`,
 
     for (const char of characters) {
       const existing = await prisma.character.findFirst({
-        where: { userId, name: { equals: char.name, mode: 'insensitive' } },
+        where: { userId, name: { equals: char.name } },
       })
 
       if (existing) {
