@@ -63,8 +63,11 @@ function startNextServer() {
       HOSTNAME: "localhost",
     };
 
+    // 使用 Electron 自带的 Node.js
+    const nodePath = isDev ? "node" : process.execPath;
+
     nextServer = spawn(
-      "node",
+      nodePath,
       [
         path.join(serverPath, "node_modules", "next", "dist", "bin", "next"),
         "start",
